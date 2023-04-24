@@ -13,9 +13,11 @@ const instance = axios.create({
 // 所有的网络请求都会走这个方法,可以在请求添加自定义内容
 instance.interceptors.request.use(
     function (config) {
-        config.headers.token = cookie.get("token")// 请求头添加token值
+        // config.headers.token = cookie.get("token")// 请求头添加token值
+        config.headers.token=localStorage.getItem("token")
         config.headers.info = 'lxy'  //请求头添加info值
-        config.headers.Authorization=cookie.get("token")
+        // config.headers.Authorization=cookie.get("token")
+        config.headers.Authorization=localStorage.getItem("token")
         return config
     },
     function (err) {

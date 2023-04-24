@@ -340,13 +340,16 @@ export default {
           login.login(this.sysuser).then((res) => {
             console.log(res);
             //将token放入cookie中
-            cookie.set("token", res.data.token, { domain: `${ServerIp}` });
+            // cookie.set("token", res.data.token, { domain: `${ServerIp}` });
+            //将token放入localstorage
+            localStorage.setItem('token', res.data.token);
             console.log(cookie.get("token"));
             //在跳转之前对token进行检查并把用户信息保存在cookie中
             login.checktoken().then((res) => {
               console.log("log=>", res);
               const userinfo = JSON.stringify(res.data.user);
-              cookie.set("userinfo", userinfo, { domain: `${ServerIp}` });
+              // cookie.set("userinfo", userinfo, { domain: `${ServerIp}` });
+              localStorage.setItem('userinfo', userinfo);
               this.sysuser = res.data.user;
               this.dialogFormVisible_login = false;
             });
@@ -360,8 +363,8 @@ export default {
       if (!this.sysuser.id) {
         this.dialogFormVisible_login = tree;
       } else {
-        cookie.set("token", "", { domain: `${ServerIp}` });
-        cookie.set("userinfo", "", { domain: `${ServerIp}` });
+        localStorage.setItem('token', "");
+        localStorage.setItem('userinfo', "");
         window.location.reload();
       }
     },

@@ -5,5 +5,11 @@ export default{
             url:`/my_oa/sys-user/getIndexTeacher`,
             method:"get"
         })
+    },
+    findUserById(id){
+        return request({
+            url:`/my_oa/sys-user/findUserById/${id}`,
+            method:'post',
+        })
     }
 }

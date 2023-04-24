@@ -2,7 +2,8 @@
   <div >
     <el-main style="padding: 0;">
       <div class="box">
-        <div class="l_aside"></div>
+        <!-- <div class="l_aside"></div> -->
+        <l_aside></l_aside>
         <div class="container">
           <div class="banner">
             <swiper
@@ -27,7 +28,9 @@
               <div class="teachercontent">
                 <div class="teachershow" v-for="item in teacherData" :key="item.id">
                   <div class="teacherdetail_left">
-                    <img :src="item.avatarUrl" width="200px" height="200px" style="border-radius: 50%;" class="teacher_img" >
+                    <img :src="item.avatarUrl" width="200px" height="200px" 
+                    style="border-radius: 50%;" class="teacher_img" 
+                    @click="to_teacherdetal(item.id)">
                   <div>{{ item.username}}</div>
                   </div>
                   <div class="teacherdetail_right">
@@ -64,7 +67,8 @@
             </div>
           </div>
         </div>
-        <div class="r_aside"></div>
+        <!-- <div class="r_aside"></div> -->
+        <r_aside></r_aside>
       </div>
     </el-main>
   </div>
@@ -74,11 +78,15 @@ import "swiper/dist/css/swiper.css";
 import { swiper, swiperSlide } from "vue-awesome-swiper";
 import teahcer from "@/api/Teacher"
 import course from "@/api/Course"
+import l_aside from "../components/l_aside.vue";
+import r_aside from "../components/r_aside.vue";
 export default {
   components: {
     // 注册 vue-awesome-swiper 组件
     swiper,
     swiperSlide,
+    l_aside,
+    r_aside
   },
 
   data() {
@@ -99,7 +107,8 @@ export default {
       httpImageUrl:
         "https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fimg.zcool.cn%2Fcommunity%2F013fe45544a15e0000019ae9049657.jpg%401280w_1l_2o_100sh.jpg&refer=http%3A%2F%2Fimg.zcool.cn&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1663827624&t=884f3f882f3070c1168c89864ae1c289",
       teacherData:{},
-      courseData:{}
+      courseData:{},
+      time:2
     };
   },
   methods: {
@@ -116,6 +125,24 @@ export default {
       course.getIndexCourseData().then(res=>{
         this.courseData=res.data.coursedata
       })
+    },
+    to_teacherdetal(id){
+      course.getCourseByUserId(id).then(res=>{
+        localStorage.setItem('course_detail',JSON.stringify(res.data.course))
+      })
+      teahcer.findUserById(id).then(res=>{
+        localStorage.setItem('teacher_detail',JSON.stringify(res.data.user))
+      })
+      //等数据加载到客户端中，避免出现上个数据
+      let t=setInterval(() => {
+        --this.time
+        if(this.time==0){
+          this.$router.push("/teacher_detail")
+          clearInterval(t)
+          this.time=2
+        }
+      }, 1000);
+      
     }
   },
   created () {
@@ -130,7 +157,7 @@ export default {
   justify-content: space-between;
   flex-direction: row;
   height: 100%;
-  padding-top:50px ;
+ 
 }
 .box .l_aside {
   flex: 1;

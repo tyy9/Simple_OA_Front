@@ -5,5 +5,11 @@ export default{
             url:`/my_oa/course/getIndexCourseData`,
             method:"get"
         })
+    },
+    getCourseByUserId(id){
+        return request({
+            url:`/my_oa/course/getCourseByUserId/${id}`,
+            method:"post"
+        })
     }
 }

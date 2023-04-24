@@ -1,8 +1,7 @@
 <template>
   <div >
-
   <Header></Header>
-  <Main ></Main>
+  <router-view></router-view>
   <Footer ></Footer>
   </div>
 </template>
@@ -11,12 +10,10 @@
 // @ is an alias to /src
 import HelloWorld from '@/components/HelloWorld.vue'
 import Header from "@/components/Header"
-import Main from "@/components/Main"
 import Footer from "@/components/Footer"
 export default {
   components:{
     Header,
-    Main,
     Footer
   }
 }
