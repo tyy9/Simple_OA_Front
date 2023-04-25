@@ -11,5 +11,11 @@ export default{
             url:`/my_oa/sys-user/findUserById/${id}`,
             method:'post',
         })
-    }
+    },
+    getTeacherByCourseId(id){
+        return request({
+            url: `/my_oa/sys-user/getTeacherByCourseId/${id}`,
+            method: 'post',
+        })
+    }    
 }

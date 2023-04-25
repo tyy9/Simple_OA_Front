@@ -50,7 +50,7 @@
               <div class="Coursecontent">
                 <div class="Courseshow" v-for="item in courseData" :key="item">
                   <div class="coursedetail_left">
-                    <img :src="item.avatar" width="200px" height="200px" class="course_img">
+                    <img :src="item.avatar" width="200px" height="200px" class="course_img" @click="to_coursedetail(item.id)">
                     <div>{{ item.name}}</div>
                     
                   </div>
@@ -76,7 +76,7 @@
 <script>
 import "swiper/dist/css/swiper.css";
 import { swiper, swiperSlide } from "vue-awesome-swiper";
-import teahcer from "@/api/Teacher"
+import teacher from "@/api/Teacher"
 import course from "@/api/Course"
 import l_aside from "../components/l_aside.vue";
 import r_aside from "../components/r_aside.vue";
@@ -116,7 +116,7 @@ export default {
       alert(i);
     },
     getindexTeacherData(){
-      teahcer.getindexTeacher().then(res=>{
+      teacher.getindexTeacher().then(res=>{
         this.teacherData=res.data.teacher
         console.log(res)
       })
@@ -130,7 +130,7 @@ export default {
       course.getCourseByUserId(id).then(res=>{
         localStorage.setItem('course_detail',JSON.stringify(res.data.course))
       })
-      teahcer.findUserById(id).then(res=>{
+      teacher.findUserById(id).then(res=>{
         localStorage.setItem('teacher_detail',JSON.stringify(res.data.user))
       })
       //等数据加载到客户端中，避免出现上个数据
@@ -143,6 +143,23 @@ export default {
         }
       }, 1000);
       
+    },
+    to_coursedetail(id){
+      course.findCourseById(id).then(res=>{
+        localStorage.setItem('course_detail',JSON.stringify(res.data.course))
+      })
+      teacher.getTeacherByCourseId(id).then(res=>{
+        localStorage.setItem('teacher_detail',JSON.stringify(res.data.teacher))
+      })
+      //等数据加载到客户端中，避免出现上个数据
+      let t=setInterval(() => {
+        --this.time
+        if(this.time==0){
+          this.$router.push("/course_detail")
+          clearInterval(t)
+          this.time=2
+        }
+      }, 1000);
     }
   },
   created () {
@@ -293,7 +310,7 @@ export default {
  border-bottom-left-radius: 0;
  box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04)
 }
-.box .container .recommendbox .Coursebox .Coursecontent .Courseshow .coursedetail_right .course_description p{
+.box .container .recommendbox .Coursebox .Coursecontent .Courseshow .coursedetail_right .course_description>p{
   margin: 0;
   padding: 5px;
   font-size: 10px;

@@ -11,5 +11,11 @@ export default{
             url:`/my_oa/course/getCourseByUserId/${id}`,
             method:"post"
         })
-    }
+    },
+    findCourseById(id) {
+        return request({
+            url: `/my_oa/course/findCourseById/${id}`,
+            method: 'post',
+        })
+    }       
 }

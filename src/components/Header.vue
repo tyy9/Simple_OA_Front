@@ -5,10 +5,10 @@
         <img src="../assets/logo.png" alt="logo" height="60px" width="100px" />
       </div>
       <div class="top">
-        <router-link to="" class="top_tittle">首页</router-link>
-        <router-link to="" class="top_tittle">首页</router-link>
-        <router-link to="" class="top_tittle">首页</router-link>
-        <router-link to="" class="top_tittle">首页</router-link>
+        <router-link to="/" class="top_tittle">首页</router-link>
+        <router-link to="" class="top_tittle">课程</router-link>
+        <router-link to="" class="top_tittle">名师</router-link>
+        <router-link to="" class="top_tittle">我的课堂</router-link>
       </div>
       <div class="user">
         <el-dropdown
@@ -84,7 +84,7 @@
       width="400px"
     >
       <el-form
-        :model="sysuser"
+        :model="sysuserdata"
         :rules="rules"
         ref="ruleForm"
         label-width="100px"
@@ -94,7 +94,7 @@
           <el-input
             class="inputtools"
             placeholder="请输入用户名"
-            v-model="sysuser.username"
+            v-model="sysuserdata.username"
             prefix-icon="el-icon-user"
             clearable
           >
@@ -104,7 +104,7 @@
           <el-input
             class="inputtools"
             placeholder="请输入密码"
-            v-model="sysuser.password"
+            v-model="sysuserdata.password"
             prefix-icon="el-icon-lock"
             show-password
           ></el-input>
@@ -273,6 +273,7 @@ export default {
       dialogFormVisible_register: false,
       dialogFormVisible_userinfo: false,
       sysuser: {},
+      sysuserdata:{},
       register_form: {},
       updateform: {},
       rules: {
@@ -337,7 +338,7 @@ export default {
     Login() {
       this.$refs["ruleForm"].validate((vaild) => {
         if (vaild) {
-          login.login(this.sysuser).then((res) => {
+          login.login(this.sysuserdata).then((res) => {
             console.log(res);
             //将token放入cookie中
             // cookie.set("token", res.data.token, { domain: `${ServerIp}` });

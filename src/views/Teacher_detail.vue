@@ -42,6 +42,7 @@
               width="200px"
               height="200px"
               style="border-radius: 50%"
+              @click=" to_coursedetail(item.id)"
             />
             <p>{{ item.name }}</p>
           </div>
@@ -54,15 +55,15 @@
           <div class="comment_show" v-for="i in 5" :key="i">
             <div class="user_info">
               <img
-              src="../assets/user.png"
-              width="50px"
-              height="50px"
-              style="border-radius: 50%"
-            />
+                src="../assets/user.png"
+                width="50px"
+                height="50px"
+                style="border-radius: 50%"
+              />
               <p>username</p>
             </div>
-              <p>:</p>
-              <p>user_comment</p>
+            <p>:</p>
+            <p>user_comment</p>
           </div>
           <el-pagination
             @size-change="handleSizeChange"
@@ -77,26 +78,30 @@
         <div class="title" style="font-size: 20px">
           <i class="el-icon-chat-line-round" style="line-height: 66px"></i>
           <p>发表你的评论吧！</p>
-          <VueTinymce id="tinymce"  v-model="description" ></VueTinymce>
         </div>
         <div class="input_comment">
           <img
-              :src="userinfo.avatarUrl"
-              width="50px"
-              height="50px"
-              style="border-radius: 50%"
-            />
+            :src="userinfo.avatarUrl"
+            width="50px"
+            height="50px"
+            style="border-radius: 50%; margin-right: 10px"
+          />
+          <VueTinymce id="tinymce" v-model="description"></VueTinymce>
+          <el-button type="primary" style="height: 100%; margin-left: 10px"
+            >发布</el-button
+          >
         </div>
       </div>
+
       <r-aside class="r_aside"></r-aside>
     </el-main>
   </div>
 </template>
 <script>
-import Course from "@/api/Course";
+import teacher from "@/api/Teacher";
+import course from "@/api/Course";
 import l_aside from "../components/l_aside.vue";
 import r_aside from "../components/r_aside.vue";
-
 export default {
   components: {
     l_aside,
@@ -109,19 +114,65 @@ export default {
       total: 0,
       page: 1,
       limit: 5,
-      userinfo:{},
-      description:{}
+      userinfo: {},
+      description: "",
+      time: 2,
     };
   },
   methods: {
     back() {
-      this.$router.back();
+      if (localStorage.getItem("pre_courseid")) {
+        course
+          .findCourseById(localStorage.getItem("pre_courseid"))
+          .then((res) => {
+            localStorage.setItem(
+              "course_detail",
+              JSON.stringify(res.data.course)
+            );
+          });
+        teacher
+          .getTeacherByCourseId(localStorage.getItem("pre_courseid"))
+          .then((res) => {
+            localStorage.setItem(
+              "teacher_detail",
+              JSON.stringify(res.data.teacher)
+            );
+          });
+      }
+      let t = setInterval(() => {
+        --this.time;
+        console.log(this.time);
+
+        if (this.time == 0) {
+          this.$router.go(-1);
+          clearInterval(t);
+          this.time = 2;
+        }
+      }, 1000);
     },
     getdetailinfo() {
       this.teacher_info = JSON.parse(localStorage.getItem("teacher_detail"));
       this.courseData = JSON.parse(localStorage.getItem("course_detail"));
       this.userinfo = JSON.parse(localStorage.getItem("userinfo"));
     },
+    to_coursedetail(id){
+      course.findCourseById(id).then(res=>{
+        localStorage.setItem('course_detail',JSON.stringify(res.data.course))
+      })
+      teacher.getTeacherByCourseId(id).then(res=>{
+        localStorage.setItem('teacher_detail',JSON.stringify(res.data.teacher))
+      })
+      //等数据加载到客户端中，避免出现上个数据
+      let t=setInterval(() => {
+        --this.time
+        if(this.time==0){
+          localStorage.setItem("pre_teacherid",this.teacher_info.id)
+          this.$router.push("/course_detail")
+          clearInterval(t)
+          this.time=2
+        }
+      }, 1000);
+    }
   },
   created() {
     this.getdetailinfo();
@@ -229,30 +280,32 @@ export default {
   cursor: pointer;
 }
 /* 评论区 */
-.comment_info{
+.comment_info {
   display: flex;
-  flex-direction:column;
+  flex-direction: column;
   text-align: left;
   border-bottom: 1px solid #ccc;
 }
-.comment_info .comment_show{
+.comment_info .comment_show {
   display: flex;
   flex-direction: row;
-
 }
-.comment_info .comment_show .user_info{
+.comment_info .comment_show .user_info {
   text-align: center;
 }
-.comment_info .comment_show .user_info>p{
-  
-  margin-top:10px;
+.comment_info .comment_show .user_info > p {
+  margin-top: 10px;
 }
-.comment_info .comment_show>p{
+.comment_info .comment_show > p {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
   margin-top: 10px;
   margin-left: 10px;
   padding: 5px;
   box-sizing: border-box;
   height: 100%;
+}
+.input_comment {
+  display: flex;
+  flex-direction: row;
 }
 </style>
