@@ -31,5 +31,12 @@ export default{
             method:"post",
             data:comment
         })
+    },
+    pageTeacher_Course(page,limit,comment){
+        return request({
+            url:`/my_oa/comment/pageTeacher_Course/${page}/${limit}`,
+            method:"post",
+            data:comment
+        })
     }
 }

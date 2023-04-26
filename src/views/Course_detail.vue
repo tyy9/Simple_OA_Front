@@ -17,7 +17,12 @@
               <img :src="courseData.avatar" width="300px " height="350px" />
             </div>
             <div class="courseinfo_right" style="margin-left: 10px">
-              <p style="font-size: 20px">{{ courseData.name }}</p>
+              <p style="font-size: 20px">
+                {{ courseData.name }}
+                <span style="font-size: 10px; color: #ccc"
+                  >[{{ subject.title }}-{{ subject_children.title }}]</span
+                >
+              </p>
               <p>学时：{{ courseData.times }}</p>
               <p>学分：{{ courseData.score }}</p>
               <p>{{ courseData.state ? "已开课" : "未开课" }}</p>
@@ -47,14 +52,14 @@
           </div>
         </div>
         <div class="title" style="font-size: 20px">
-          <i class="el-icon-view" style="line-height: 26px"></i>
+          <i class="el-icon-view" style="line-height: 66px"></i>
           <p>课程简介</p>
         </div>
         <div class="detail_course_description" v-html="courseData.description">
           <p>{{ courseData.description }}</p>
         </div>
         <div class="title" style="font-size: 20px">
-          <i class="el-icon-chat-line-round" style="line-height: 26px"></i>
+          <i class="el-icon-chat-line-round" style="line-height: 66px"></i>
           <p>最新评论</p>
         </div>
         <div class="comment_info">
@@ -66,13 +71,59 @@
                 height="50px"
                 style="border-radius: 50%"
               />
-              <p>{{item.username}}</p>
+              <p>{{ item.username }}</p>
             </div>
             <p>:</p>
-            <p v-html="item.content " >{{item.content}}</p>
-            <p style="box-shadow: none;font-size: 10px;color: #ccc;">{{ item.gmtCreate }}</p>
-            <p style="box-shadow: none;font-size: 10px;color: red; cursor: pointer;font-weight: bold;" 
-                v-show="item.userId==userinfo.id?true:false" @click="open(item.id)">删除</p>
+            <div class="content_box">
+              <div class="reply_box" v-show="item.replyuser_username?true:false">
+                <p style="line-height: 40px;color:red;font-size: 10px;font-weight: bold;">
+                  回复  {{item.replyuser_username}}:
+                </p> 
+                <p style="line-height: 40px;">
+                  "
+                </p> 
+              <p v-html="item.reply_content">
+                {{ item.reply_content }}
+              </p>
+              <p style="line-height: 40px;">
+                  "
+                </p> 
+              </div>
+              
+              <p v-html="item.content">
+                {{ item.content }}
+              </p>
+            </div>
+           
+           
+            <p style="box-shadow: none; font-size: 10px; color: #ccc">
+              {{ item.gmtCreate }}
+            </p>
+            <p
+              style="
+                box-shadow: none;
+                font-size: 10px;
+                color: blue;
+                cursor: pointer;
+                font-weight: bold;
+              "
+              @click="openreply(item.id)"
+            >
+              回复
+            </p>
+            <p
+              style="
+                box-shadow: none;
+                font-size: 10px;
+                color: red;
+                cursor: pointer;
+                font-weight: bold;
+              "
+              v-show="item.userId == userinfo.id ? true : false"
+              @click="open(item.id)"
+            >
+              删除
+            </p>
           </div>
           <el-pagination
             @size-change="handleSizeChange"
@@ -86,7 +137,7 @@
         </div>
 
         <div class="title" style="font-size: 20px">
-          <i class="el-icon-chat-line-round" style="line-height: 26px"></i>
+          <i class="el-icon-chat-line-round" style="line-height: 66px"></i>
           <p>发表你的评论吧！</p>
         </div>
 
@@ -98,10 +149,24 @@
             style="border-radius: 50%; margin-right: 10px"
           />
           <VueTinymce id="tinymce" v-model="comment.content"></VueTinymce>
-          <el-button type="primary" style="height: 100%; margin-left: 10px" @click="submit_commit"
+          <el-button
+            type="primary"
+            style="height: 100%; margin-left: 10px"
+            @click="submit_commit"
             >发布</el-button
           >
         </div>
+        <el-dialog title="回复" :visible.sync="dialogFormVisible">
+          <el-form :model="form">
+            <VueTinymce id="tinymce" v-model="comment.content"></VueTinymce>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormVisible = false">取 消</el-button>
+            <el-button type="primary" @click="submit_reply"
+              >确 定</el-button
+            >
+          </div>
+        </el-dialog>
       </div>
 
       <r-aside class="r_aside"></r-aside>
@@ -115,8 +180,8 @@ import l_aside from "../components/l_aside.vue";
 import r_aside from "../components/r_aside.vue";
 import Comment from "@/api/Comment";
 import subject from "@/api/Subject";
-import Course from '../../../oa_vue/src/api/Course';
-
+import Course from "../../../oa_vue/src/api/Course";
+import tree from '../../../../../guli/源码/day18/前端整合代码/element-ui依赖/element-ui/packages/table/src/store/tree';
 
 export default {
   components: {
@@ -132,11 +197,14 @@ export default {
       limit: 5,
       userinfo: {},
       time: 2,
-      subject:{},
-      subject_children:[],
-      comment:{},
-      commentList:{},
-      commentdata:{}
+      subject: {},
+      subject_children: [],
+      comment: {},
+      commentList: {},
+      commentdata: {},
+      form:{},
+      dialogFormVisible:false,
+      reply_id:""
     };
   },
   methods: {
@@ -172,10 +240,22 @@ export default {
     getdetailinfo() {
       this.teacher_info = JSON.parse(localStorage.getItem("teacher_detail"));
       this.courseData = JSON.parse(localStorage.getItem("course_detail"));
-      this.userinfo = JSON.parse(localStorage.getItem("userinfo"));
-      this.commentdata.courseId=this.courseData.id
+      if(localStorage.getItem("userinfo")){
+        this.userinfo = JSON.parse(localStorage.getItem("userinfo"));
+      }
+      
+      this.commentdata.courseId = this.courseData.id;
       //获取分类
-      this.getCourseComment()
+      subject.findSubjectById(this.courseData.subjectId).then((res) => {
+        console.log("subject=>", res.data.subject);
+        this.subject = res.data.subject;
+      });
+      //获取分类
+      subject.findSubjectById(this.courseData.subjectParentid).then((res) => {
+        console.log("subject=>", res.data.subject);
+        this.subject_children = res.data.subject;
+      });
+      this.getCourseComment();
     },
     to_teacherdetal(id) {
       course.getCourseByUserId(id).then((res) => {
@@ -196,48 +276,72 @@ export default {
       }, 1000);
     },
     //发布评论
-    submit_commit(){
-        this.comment.courseId=this.courseData.id
-        this.comment.userId=this.userinfo.id
-        Comment.addComment(this.comment).then(res=>{
-          this.$message({
-            message:"发布成功",
-            type:"success"
-          })
-          this.getCourseComment() 
-        })
+    submit_commit() {
+      this.comment.courseId = this.courseData.id;
+      this.comment.userId = this.userinfo.id;
+      Comment.addComment(this.comment).then((res) => {
+        this.$message({
+          message: "发布成功",
+          type: "success",
+        });
+        this.comment.content = "";
+        this.getCourseComment();
+      });
     },
     //获取课程评论
-    getCourseComment(){
+    getCourseComment() {
       // Comment.getCourseComment(this.courseData.id).then(res=>{
       //   this.commentList=res.data.comment
       // })
-      Comment.pageComment_Course(this.page,this.limit,this.commentdata).then(res=>{
-          this.total=res.data.total
-          this.commentList=res.data.comment
-      })
+      Comment.pageComment_Course(this.page, this.limit, this.commentdata).then(
+        (res) => {
+          this.total = res.data.total;
+          this.commentList = res.data.comment;
+        }
+      );
     },
-     //删除弹窗
-     open(id){
-      this.$confirm('此操作将永久删除该评论, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          Comment.deleteCommentById(id).then(res=>{
+    //删除弹窗
+    open(id) {
+      this.$confirm("此操作将永久删除该评论, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(() => {
+          Comment.deleteCommentById(id).then((res) => {
             this.$message({
-            type: 'success',
-            message: '删除成功!'
+              type: "success",
+              message: "删除成功!",
+            });
+            this.getCourseComment();
           });
-          this.getCourseComment() 
-          })
-        }).catch(() => {
+        })
+        .catch(() => {
           this.$message({
-            type: 'info',
-            message: '已取消删除'
-          });          
+            type: "info",
+            message: "已取消删除",
+          });
         });
     },
+    //回复窗口
+    openreply(id) {
+      this.dialogFormVisible=true
+      this.reply_id=id
+    },
+    submit_reply(){
+      this.comment.courseId = this.courseData.id;
+      this.comment.userId = this.userinfo.id;
+      this.comment.replyId=this.reply_id
+      Comment.addComment(this.comment).then((res) => {
+        this.$message({
+          message: "发布成功",
+          type: "success",
+        });
+        this.comment.content = "";
+        this.getCourseComment();
+        this.dialogFormVisible=false
+      });
+    }
   },
   created() {
     this.getdetailinfo();
@@ -287,9 +391,11 @@ export default {
   display: flex;
   flex-direction: row;
 }
+
 .title p {
   margin: 0;
   padding: 0;
+  line-height: 66px;
 }
 
 .box2
@@ -389,8 +495,30 @@ export default {
   box-sizing: border-box;
   height: 100%;
 }
+.content_box{
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+  padding: 5px;
+  height: 100%;
+  margin-left: 5px;
+  margin-bottom: 5px;
+}
+.content_box .reply_box{
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: row;
+  font-size: 10px;
+  background-color: #dedede;
+  padding: 5px;
+}
+.content_box .reply_box>p{
+  line-height: 20px;
+  color: white;
+}
 .input_comment {
   display: flex;
   flex-direction: row;
 }
+/* 在el-dialog中tinymce z-index 被太小而被遮挡时要加这两句 */
+.tox-tinymce-aux{z-index:99999 !important;}
+.tinymce.ui.FloatPanel{z-Index: 99;}
 </style>
