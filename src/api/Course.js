@@ -17,5 +17,13 @@ export default{
             url: `/my_oa/course/findCourseById/${id}`,
             method: 'post',
         })
-    }       
+    },
+    pageCourse(page, limit, course) {
+        return request({
+            url: `/my_oa/course/pageCourse/${page}/${limit}`,
+            method: 'post',
+            data: course
+        })
+    },
+    
 }

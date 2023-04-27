@@ -180,8 +180,7 @@ import l_aside from "../components/l_aside.vue";
 import r_aside from "../components/r_aside.vue";
 import Comment from "@/api/Comment";
 import subject from "@/api/Subject";
-import Course from "../../../oa_vue/src/api/Course";
-import tree from '../../../../../guli/源码/day18/前端整合代码/element-ui依赖/element-ui/packages/table/src/store/tree';
+
 
 export default {
   components: {

@@ -17,5 +17,6 @@ export default{
             url: `/my_oa/sys-user/getTeacherByCourseId/${id}`,
             method: 'post',
         })
-    }    
+    },
+        
 }

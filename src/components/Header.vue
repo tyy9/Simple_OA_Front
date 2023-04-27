@@ -353,6 +353,7 @@ export default {
               localStorage.setItem('userinfo', userinfo);
               this.sysuser = res.data.user;
               this.dialogFormVisible_login = false;
+              window.location.reload()
             });
           });
         } else {

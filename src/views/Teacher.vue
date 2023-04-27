@@ -6,22 +6,23 @@
           <div class="search_header">
             <div class="input_search">
               <el-input
-                v-model="coursedata.name"
-                placeholder="请输入课程标题"
+                v-model="teacherdata.username"
+                placeholder="请输入教师名字标题"
                 style="width: 200px"
               ></el-input>
-              <el-button type="primary">搜索</el-button>
+              <el-button type="primary" @click="findTeacherByname">搜索</el-button>
             </div>
           </div>
-          <div class="course_content">
-            <div class="course_content_show" v-for="i in 5" :key="i">
-              <img src="../assets/logo.png" width="200px" height="200p" />
-              <p>name</p>
+          <div class="teacher_content">
+            <div class="teacher_content_show" v-for="item in teacherList" :key="item">
+              <img :src="item.avatarUrl" width="200px" height="200p" style="cursor: pointer;"
+              @click="to_teacherdetal(item.id)"/>
+              <p>{{item.username}}</p>
             </div>
           </div>
           <el-pagination
             @size-change="handleSizeChange"
-            @current-change="getCourseComment"
+            @current-change="getteacherinfo"
             :current-page.sync="page"
             :page-size="limit"
             layout="total, prev, pager, next"
@@ -36,7 +37,9 @@
   <script>
   import l_aside from "../components/l_aside.vue";
   import r_aside from "../components/r_aside.vue";
-  
+  import course from "@/api/Course";
+  import teacher from "@/api/Teacher"
+  import user from "@/api/user"
   export default {
     components: {
       l_aside,
@@ -44,12 +47,51 @@
     },
     data() {
       return {
-        coursedata: {},
+        teacherdata: {},
         total: 0,
         page: 1,
         limit: 5,
+        teacherList:{},
+        time:2
       };
     },
+    methods: {
+      getinfo(){
+        this.getteacherinfo()
+      },
+      getteacherinfo(){
+        this.teacherdata.role="ROLE_TEACHER"  
+        user.pageUser(this.page,this.limit,this.teacherdata).then(res=>{
+          this.total=res.data.total
+          this.teacherList=res.data.data
+        })
+      },
+      to_teacherdetal(id){
+      course.getCourseByUserId(id).then(res=>{
+        localStorage.setItem('course_detail',JSON.stringify(res.data.course))
+      })
+      teacher.findUserById(id).then(res=>{
+        localStorage.setItem('teacher_detail',JSON.stringify(res.data.user))
+      })
+      //等数据加载到客户端中，避免出现上个数据
+      let t=setInterval(() => {
+        --this.time
+        if(this.time==0){
+          this.$router.push("/teacher_detail")
+          clearInterval(t)
+          this.time=2
+        }
+      }, 1000);
+      
+    },
+    findTeacherByname(){
+      this.getteacherinfo()
+    }
+    },
+    created () {
+      this.getinfo()
+    },
+    
   };
   </script>
   <style>
@@ -116,18 +158,30 @@
     margin-top: 10px;
     font-size: 10px;
   }
-  /* 课程列表 */
-  .course_content {
+  /* 教师列表 */
+  .teacher_content {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: left;
     flex-wrap: wrap;
     margin-top: 10px;
   }
-  .course_content .course_content_show > img {
+  .teacher_content .teacher_content_show {
+    margin-left: 15px;
+    margin-right: 15px;
+  }
+  .teacher_content .teacher_content_show > img {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
   }
-  .course_content .course_content_show > p {
+  .teacher_content .teacher_content_show > img:hover{
+    position: relative;
+  bottom: 10px;
+  border: 2px solid rgb(201, 218, 255);
+  border-top: none;
+  border-bottom: 6px solid rgb(136, 85, 255);
+  cursor: pointer;
+  }
+  .teacher_content .teacher_content_show > p {
     margin: 0;
   }
   </style>
