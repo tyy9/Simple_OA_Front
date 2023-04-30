@@ -8,7 +8,7 @@
         <router-link to="/" class="top_tittle">首页</router-link>
         <router-link to="/course" class="top_tittle">课程</router-link>
         <router-link to="/teacher" class="top_tittle">名师</router-link>
-        <router-link to="" class="top_tittle">我的课堂</router-link>
+        <router-link to="/myclassroom" class="top_tittle">我的课堂</router-link>
       </div>
       <div class="user">
         <el-dropdown

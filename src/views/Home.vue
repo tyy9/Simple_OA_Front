@@ -41,6 +41,7 @@ export default {
     color: #333;
     text-align: center;
     height: 100%;
+    
   }
   
   body > .el-container {
@@ -55,4 +56,6 @@ export default {
   .el-container:nth-child(7) .el-aside {
     line-height: 320px;
   }
+
+
 </style>

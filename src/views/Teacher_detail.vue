@@ -334,7 +334,7 @@ export default {
 
 .box2 .container {
   background-color: #ffffff;
-  flex: 3;
+  flex: 5;
   width: 100%;
   height: auto;
   padding: 20px;

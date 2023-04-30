@@ -27,7 +27,7 @@
               <p>学分：{{ courseData.score }}</p>
               <p>{{ courseData.state ? "已开课" : "未开课" }}</p>
               <p>￥{{ courseData.price }}</p>
-              <el-button type="primary" slot="reference"
+              <el-button type="primary" slot="reference" @click="open_pay"
                 ><i class="el-icon-shopping-cart-2"></i>购买
               </el-button>
               <i
@@ -167,6 +167,24 @@
             >
           </div>
         </el-dialog>
+
+        <el-dialog title="购买课程" :visible.sync="dialogPayFormVisible">
+          <div class="order">
+            <div class="order_right">
+                <img :src="courseData.avatar" width="500px" height="400px">
+            </div>
+            <div class="order_left">
+                <p>{{ courseData.name }}</p>
+                <p>￥{{ courseData.price }}</p>
+            </div>
+          </div>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="submit_pay_later">稍后支付</el-button>
+            <el-button type="primary" @click="submit_pay"
+              >立即支付</el-button
+            >
+          </div>
+        </el-dialog>
       </div>
 
       <r-aside class="r_aside"></r-aside>
@@ -180,7 +198,7 @@ import l_aside from "../components/l_aside.vue";
 import r_aside from "../components/r_aside.vue";
 import Comment from "@/api/Comment";
 import subject from "@/api/Subject";
-
+import order from '@/api/Order'
 
 export default {
   components: {
@@ -203,7 +221,9 @@ export default {
       commentdata: {},
       form:{},
       dialogFormVisible:false,
-      reply_id:""
+      dialogPayFormVisible:false,
+      reply_id:"",
+      orderdata:{}
     };
   },
   methods: {
@@ -340,6 +360,39 @@ export default {
         this.getCourseComment();
         this.dialogFormVisible=false
       });
+    },
+    //打开购物菜单
+    open_pay(){
+      this.dialogPayFormVisible=true
+      this.orderdata.userId=this.userinfo.id
+      this.orderdata.courseId=this.courseData.id
+      this.orderdata.price=this.courseData.price
+      this.orderdata.courseName=this.courseData.name
+      this.orderdata.courseAvatar=this.courseData.avatar
+    },
+    submit_pay(){
+      this.orderdata.status=true
+      this.orderdata.time=0
+      order.addOrder(this.orderdata).then(res=>{
+        this.$message({
+          type:"success",
+          message:"购买成功"
+        })
+        this.dialogPayFormVisible=false
+        this.getdetailinfo()
+      })
+    },
+    submit_pay_later(){
+      this.orderdata.status=false
+      this.orderdata.time=50*1000
+      order.addOrder(this.orderdata).then(res=>{
+        this.$message({
+          type:"success",
+          message:"请在我的课堂里继续支付，距自动取消支付还有5分钟"
+        })
+        this.dialogPayFormVisible=false
+        this.getdetailinfo()
+      })
     }
   },
   created() {
@@ -368,7 +421,7 @@ export default {
 
 .box2 .container {
   background-color: #ffffff;
-  flex: 3;
+  flex: 6;
   width: 100%;
   height: auto;
   padding: 20px;
@@ -516,6 +569,18 @@ export default {
 .input_comment {
   display: flex;
   flex-direction: row;
+}
+/* 订单 */
+.order{
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+}
+.order .order_left{
+  flex: 2;
+}
+.order .order_right{
+  flex: 1;
 }
 /* 在el-dialog中tinymce z-index 被太小而被遮挡时要加这两句 */
 .tox-tinymce-aux{z-index:99999 !important;}

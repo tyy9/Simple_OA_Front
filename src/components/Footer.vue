@@ -20,7 +20,11 @@
 <style>
     .footer-box{
         padding: 0;
-        margin: 0;
+        width: 100%;
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        opacity: 90%;
     }
     section{
         margin: 0;

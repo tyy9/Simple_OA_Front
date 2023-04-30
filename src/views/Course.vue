@@ -147,7 +147,7 @@ export default {
 
 .box3 .container {
   background-color: #ffffff;
-  flex: 3;
+  flex: 6;
   width: 100%;
   height: auto;
   padding: 20px;
