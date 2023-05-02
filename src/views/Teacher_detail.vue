@@ -264,7 +264,7 @@ export default {
       //   this.commentList=res.data.comment
       // })
       Comment.pageTeacher_Course(this.page,this.limit,this.commentdata).then(res=>{
-          this.total=res.data.total
+          this.total=this.total=parseInt(res.data.total); 
           this.commentList=res.data.comment
       })
     },

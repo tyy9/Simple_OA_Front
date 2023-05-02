@@ -25,6 +25,7 @@
         left: 0;
         bottom: 0;
         opacity: 90%;
+        z-index: 100;
     }
     section{
         margin: 0;

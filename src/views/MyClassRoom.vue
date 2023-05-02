@@ -3,7 +3,7 @@
         <el-main class="box4">
             <l-aside class="l_aside"></l-aside>
             <div class="container">
-                <div class="order_show" v-for="item in orderdata" :key="item">
+                <div class="order_show" v-for="(item,index) in orderdata" :key="index">
                     <div class="order_show_left">
                         <img :src="item.courseAvatar" width="300px" height="200px">
                     </div>
@@ -16,8 +16,16 @@
                         <p v-show="!item.status?'primary':''">
                         剩余时间:{{item.hour!=0?item.hour:0}}时{{ item.min }}分{{ item.second }}秒</p>
                         <el-button :type="!item.status?'primary':''"
-                            :disabled="item.status?true:false" @click="order_pay(item.id)"
-                        >{{ !item.status?'支付':'已购买' }}</el-button>
+                             @click="payORlearning(item.id,item.status,index)"
+                        >{{ !item.status?'支付':'进入课程' }}</el-button>
+                        <el-button :type="!item.status?'danger':''"
+                             @click="open(item.id,index)"
+                             v-show="!item.status?true:false "
+                             style="margin-top: 10px;"
+                        >取消支付</el-button>
+                        <!-- <el-button :type="!item.status?'primary':''"
+                             @click="payORlearning(item.id,item.status)"
+                        >{{ !item.status?'支付':'进入课程' }}</el-button> -->
                     </div>
                 </div>
                 <el-pagination
@@ -29,6 +37,23 @@
             :total="total"
           >
           </el-pagination>
+
+          <el-dialog title="购买课程" :visible.sync="dialogPayFormVisible">
+          <div class="order">
+            <div class="order_right">
+                <img :src="OrderTemp.courseAvatar" width="500px" height="400px">
+            </div>
+            <div class="order_left">
+                <p>{{ OrderTemp.courseName }}</p>
+                <p>￥{{ OrderTemp.price }}</p>
+            </div>
+          </div>
+          <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="order_pay"
+              >立即支付</el-button
+            >
+          </div>
+        </el-dialog>
             </div>
             <r-aside class="r_aside"></r-aside>
         </el-main>
@@ -38,6 +63,7 @@
 import Order from '../api/Order';
 import l_aside from '../components/l_aside.vue';
 import r_aside from '../components/r_aside.vue';
+import course from "@/api/Course"
 export default {
     comments:{
         l_aside,    
@@ -53,6 +79,16 @@ export default {
       hours:[],
       min:[],
       second:[],
+      ordersearch:{},
+      OrderTemp:{
+        courseAvatar:"",
+        courseName:"",
+        price:""
+      },
+      dialogPayFormVisible:false,
+      t:"",
+      flag:[],
+      sleceted_order:""
     };
   },
   methods:{
@@ -60,51 +96,98 @@ export default {
         this.pageOrder()
     },
     pageOrder(){
-        Order.pageOrder(this.page,this.limit,this.orderdata).then(res=>{
+        Order.pageOrder(this.page,this.limit,this.ordersearch).then(res=>{
             this.orderdata=res.data.data
-            this.total=res.data.total
+            this.total=parseInt(res.data.total)  
             this.time=this.orderdata.map(v=>v.time_count)
             console.log("orderdata=>",this.orderdata)
             console.log("time=>",this.time)
-            let t=setInterval(() => {
-                this.orderdata.forEach(item=>{
-                    console.log(item.second)
-                    --item.time_count
-                    item.second=Math.ceil(item.time_count%60)
-                    item.min=Math.ceil(item.time_count/60)
-                    item.hour=Math.round(item.time_count/60/60)
-                    console.log("hour=>",item.hour)
-                    // item.second=this.second
-                    // item.min=this.min
-                    // item.hour=this.hour
-                    if(item.time_count==0){
-                        item.time_count=0
-                        clearInterval(t)
+            this.t=setInterval(() => {
+                this.orderdata.forEach((item,index)=>{
+                    if(item.time_count!=null){
+                      console.log("index=>",item.time_count)
+                      --item.time_count
+                      item.second=Math.floor(item.time_count%60)
+                      item.min=Math.floor(item.time_count/60)
+                      item.hour=Math.floor(item.time_count/60/60)
+                      if(item.time_count<=0){
+                        console.log(item.time_count)
+                        this.flag[index]=1
+                        item.item_count=0
+                        this.getOrderinfo()
+                        return
+                      }
                     }
+                    // console.log("hour=>",item.hour)
+                    
                 })
-               
             }, 1000);
-            
-            
-        //    this.orderdata.forEach(item=>{
-        //             console.log(item)
-        //              --item.time_count
-        //             this.second=Math.ceil(item.time_count%60)
-        //             this.min=Math.ceil(item.time_count/60)
-        //             this.hours=Math.ceil(this.min/60)
-        //             this.orderinfo.second=this.second
-        //             this.orderinfo.min=this.min
-        //             this.orderinfo.hour=this.hour
-        //    })
+          
         })
         
     },
-    order_pay(id){
-
-    }
+    order_pay(id,item){
+      this.OrderTemp.status=1
+      this.orderdata[this.sleceted_order].item_count=0
+      Order.updateOrder(this.OrderTemp).then(res=>{
+        this.$message({
+          type:"success",
+          message:"购买成功"
+        })
+        this.dialogPayFormVisible=false
+        this.getOrderinfo()
+      })
+    },
+    findOrderById(id,item){
+      this.dialogPayFormVisible=true
+      console.log(id)
+      Order.findOrderById(id).then(res=>{
+        this.OrderTemp=res.data.order
+      })
+    },
+    payORlearning(id,status,index){
+      if(status){
+        this.$message({
+          message:"课程功能还在制作，敬请期待",
+          type:"error"
+        })
+        // this.findOrderById(id)
+      }
+      else{
+          this.sleceted_order=index
+        this.findOrderById(id)
+      }
+    },
+    open(id,index) {
+      this.$confirm("此操作将永久取消该订单, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(() => {
+          this.sleceted_order=index
+          this.orderdata[this.sleceted_order].item_count=0
+          Order.deleteOrderByid(id).then((res) => {
+            this.$message({
+              type: "success",
+              message: "取消成功!",
+            });
+            this.getOrderinfo();
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除",
+          });
+        });
+    },
   },
   created () {
     this.getOrderinfo();
+  },
+  destroyed () {
+    clearInterval(this.t)
   }
 }
 </script>
@@ -171,4 +254,15 @@ export default {
     width: 100px;
     margin: 0 auto;
   }
+  .order{
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+}
+.order .order_left{
+  flex: 2;
+}
+.order .order_right{
+  flex: 1;
+}
 </style>

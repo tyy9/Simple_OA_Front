@@ -59,6 +59,13 @@ instance.interceptors.response.use(
             })
             return Promise.reject('error')
         }
+        else if (res.code == 25) {
+            Notification.warning({
+                title:"提示",
+                message:res.message
+            })
+            return Promise.reject('error')
+        }
         return res
     },
     function (err) {

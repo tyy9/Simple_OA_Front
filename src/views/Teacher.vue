@@ -62,7 +62,7 @@
       getteacherinfo(){
         this.teacherdata.role="ROLE_TEACHER"  
         user.pageUser(this.page,this.limit,this.teacherdata).then(res=>{
-          this.total=res.data.total
+          this.total=this.total=parseInt(res.data.total)  
           this.teacherList=res.data.data
         })
       },

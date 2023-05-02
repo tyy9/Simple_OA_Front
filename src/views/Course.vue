@@ -85,7 +85,7 @@ export default {
     getcourseinfo(){
       course.pageCourse(this.page,this.limit,this.coursedata).then(res=>{
         this.courseList=res.data.data
-        this.total=res.data.total
+        this.total=this.total=parseInt(res.data.total)  
       })
     },
     //根据分类搜索课程

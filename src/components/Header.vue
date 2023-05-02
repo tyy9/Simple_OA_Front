@@ -45,7 +45,7 @@
               flex-direction: column;
             "
           >
-            {{ sysuser.username }}</span
+            {{ sysuser.nickname }}</span
           >
           <i
             class="el-icon-arrow-down"
@@ -131,8 +131,18 @@
         <el-form-item label="用户名" prop="username">
           <el-input
             class="inputtools"
-            placeholder="请输入用户名"
+            placeholder="请输入手机号"
             v-model="register_form.username"
+            prefix-icon="el-icon-user"
+            clearable
+          >
+          </el-input>
+        </el-form-item>
+        <el-form-item label="昵称" prop="ninckname">
+          <el-input
+            class="inputtools"
+            placeholder="请输入昵称"
+            v-model="register_form.ninckname"
             prefix-icon="el-icon-user"
             clearable
           >
@@ -147,29 +157,16 @@
             show-password
           ></el-input>
         </el-form-item>
-        <el-form-item label="别称" prop="password">
+        <el-form-item label="验证码" prop="code" >
           <el-input
             class="inputtools"
-            placeholder="请输入别称"
-            v-model="register_form.nickname"
-            prefix-icon="el-icon-lock"
+            placeholder="请输入验证码"
+            v-model="register_form.code"
+            style="width: 100px;font-size: 10px;"
           ></el-input>
-        </el-form-item>
-        <el-form-item label="邮箱" prop="password">
-          <el-input
-            class="inputtools"
-            placeholder="请输入邮箱"
-            v-model="register_form.email"
-            prefix-icon="el-icon-lock"
-          ></el-input>
-        </el-form-item>
-        <el-form-item label="电话" prop="password">
-          <el-input
-            class="inputtools"
-            placeholder="请输入电话"
-            v-model="register_form.phone"
-            prefix-icon="el-icon-lock"
-          ></el-input>
+          <el-button type="primary" @click="getcode" 
+          :disabled="codetime!=0?true:false"
+          style="margin-left: 10px;font-size: 10px;">获取验证码{{codetime!=0?codetime:""}}</el-button>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -209,7 +206,7 @@
             show-password
           ></el-input>
         </el-form-item>
-        <el-form-item label="别称" prop="password">
+        <el-form-item label="别称" prop="ninckname">
           <el-input
             class="inputtools"
             placeholder="请输入别称"
@@ -261,7 +258,7 @@
 import login from "@/api/Login";
 import cookie from "js-cookie";
 import { ServerIp } from "../../../oa_vue/public/config";
-import tree from "../../../../../guli/源码/day18/前端整合代码/element-ui依赖/element-ui/packages/table/src/store/tree";
+import index from "@/api/Index"
 import user from "@/api/user";
 export default {
   data() {
@@ -276,6 +273,7 @@ export default {
       sysuserdata:{},
       register_form: {},
       updateform: {},
+      codetime:60,
       rules: {
         username: [
           {
@@ -363,13 +361,15 @@ export default {
     },
     loginORregister() {
       if (!this.sysuser.id) {
-        this.dialogFormVisible_login = tree;
+        this.dialogFormVisible_login = true;
       } else {
         localStorage.setItem('token', "");
         localStorage.setItem('userinfo', "");
         window.location.reload();
       }
     },
+    //-----------------------
+    //注册
     register() {
       login.register_common(this.register_form).then((res) => {
         this.$notify({
@@ -381,6 +381,19 @@ export default {
         this.dialogFormVisible_register = false;
       });
     },
+    getcode(){
+      index.getcode(this.register_form).then(res=>{
+          console.log(res)
+      })
+      let t=setInterval(() => {
+        this.codetime--;
+        if(this.codetime<=0){
+          this.codetime=60
+          clearInterval(t)
+        }
+      }, 1000);
+    },
+    //----------------------
     finduserinfobyid() {
       this.dialogFormVisible_userinfo = true;
       user.findUserById(this.sysuser.id).then((res) => {
