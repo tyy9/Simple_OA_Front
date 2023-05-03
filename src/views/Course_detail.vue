@@ -48,7 +48,7 @@
               style="margin-top: 10px; border-radius: 50%"
               @click="to_teacherdetal(teacher_info.id)"
             />
-            <p style="color: black">{{ teacher_info.username }}</p>
+            <p style="color: black">{{ teacher_info.nickname }}</p>
           </div>
         </div>
         <div class="title" style="font-size: 20px">
@@ -167,11 +167,12 @@
             >
           </div>
         </el-dialog>
-
+        
         <el-dialog title="购买课程" :visible.sync="dialogPayFormVisible">
           <div class="order">
             <div class="order_right">
                 <img :src="courseData.avatar" width="500px" height="400px">
+                <img src="../assets/user.png">
             </div>
             <div class="order_left">
                 <p>{{ courseData.name }}</p>
@@ -384,7 +385,7 @@ export default {
     },
     submit_pay_later(){
       this.orderdata.status=false
-      this.orderdata.time=50*1000
+      this.orderdata.time=1
       order.addOrder(this.orderdata).then(res=>{
         this.$message({
           type:"success",

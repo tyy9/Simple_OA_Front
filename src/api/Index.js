@@ -6,5 +6,13 @@ export default{
             method:"post",
             data:user
         })
+    },
+    register_student(user){
+        return request({
+            url:`/my_oa/index/register_student`,
+            method:"post",
+            data:user
+        })
     }
+    
 }

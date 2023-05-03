@@ -17,7 +17,7 @@
             <div class="teacher_content_show" v-for="item in teacherList" :key="item">
               <img :src="item.avatarUrl" width="200px" height="200p" style="cursor: pointer;"
               @click="to_teacherdetal(item.id)"/>
-              <p>{{item.username}}</p>
+              <p>{{item.nickname}}</p>
             </div>
           </div>
           <el-pagination

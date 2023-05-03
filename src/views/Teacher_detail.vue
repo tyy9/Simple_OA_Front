@@ -22,7 +22,7 @@
             />
             <div class="t_info_right">
               <p style="font-size: 30px; font-weight: bold">
-                {{ teacher_info.username }}
+                {{ teacher_info.nickname }}
               </p>
               <p v-html="teacher_info.description" class="teacher_description">
                 {{ teacher_info.description }}
@@ -116,7 +116,7 @@
           </div>
           <el-pagination
             @size-change="handleSizeChange"
-            @current-change="getCourseComment"
+            @current-change="getTeacherComment"
             :current-page.sync="page"
             :page-size="limit"
             layout="total, prev, pager, next"

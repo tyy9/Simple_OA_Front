@@ -142,7 +142,7 @@
           <el-input
             class="inputtools"
             placeholder="请输入昵称"
-            v-model="register_form.ninckname"
+            v-model="register_form.nickname"
             prefix-icon="el-icon-user"
             clearable
           >
@@ -165,8 +165,8 @@
             style="width: 100px;font-size: 10px;"
           ></el-input>
           <el-button type="primary" @click="getcode" 
-          :disabled="codetime!=0?true:false"
-          style="margin-left: 10px;font-size: 10px;">获取验证码{{codetime!=0?codetime:""}}</el-button>
+          :disabled="codetime<60&&codetime>0?true:false"
+          style="margin-left: 10px;font-size: 10px;">获取验证码{{codetime<60&&codetime>0?codetime:""}}</el-button>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -197,15 +197,6 @@
           >
           </el-input>
         </el-form-item>
-        <el-form-item label="密码" prop="password">
-          <el-input
-            class="inputtools"
-            placeholder="请输入密码"
-            v-model="updateform.password"
-            prefix-icon="el-icon-lock"
-            show-password
-          ></el-input>
-        </el-form-item>
         <el-form-item label="别称" prop="ninckname">
           <el-input
             class="inputtools"
@@ -214,7 +205,7 @@
             prefix-icon="el-icon-lock"
           ></el-input>
         </el-form-item>
-        <el-form-item label="邮箱" prop="password">
+        <el-form-item label="邮箱" prop="email">
           <el-input
             class="inputtools"
             placeholder="请输入邮箱"
@@ -222,7 +213,7 @@
             prefix-icon="el-icon-lock"
           ></el-input>
         </el-form-item>
-        <el-form-item label="电话" prop="password">
+        <el-form-item label="电话" prop="phone">
           <el-input
             class="inputtools"
             placeholder="请输入电话"
@@ -243,6 +234,8 @@
             v-if="updateform.avatarUrl"
             :src="updateform.avatarUrl"
             class="avatar"
+            width="300px"
+            height="300px"
           />
           <i v-else class="el-icon-plus avatar-uploader-icon"></i>
         </el-upload>
@@ -260,6 +253,8 @@ import cookie from "js-cookie";
 import { ServerIp } from "../../../oa_vue/public/config";
 import index from "@/api/Index"
 import user from "@/api/user";
+import { stringify } from 'querystring';
+import request from '@/utils/request'
 export default {
   data() {
     return {
@@ -274,6 +269,7 @@ export default {
       register_form: {},
       updateform: {},
       codetime:60,
+      test:{},
       rules: {
         username: [
           {
@@ -317,7 +313,7 @@ export default {
             trigger: "blur",
           },
         ],
-        电话: [
+        phone: [
           {
             required: false,
             message: "请输入电话",
@@ -328,7 +324,7 @@ export default {
       },
       requestHeader: {
         //未上传图片的请求头加token
-        Authorization: cookie.get("token"),
+        Authorization:""
       },
     };
   },
@@ -371,15 +367,37 @@ export default {
     //-----------------------
     //注册
     register() {
-      login.register_common(this.register_form).then((res) => {
+      index.register_student(this.register_form).then((res) => {
         this.$notify({
           message: "注册成功，将自动登录",
           type: "success",
         });
-        this.sysuser = this.register_form;
-        this.Login();
-        this.dialogFormVisible_register = false;
+        this.sysuserdata.username = this.register_form.username;
+        this.sysuserdata.password = this.register_form.password;
+        login.login(this.sysuserdata).then((res) => {
+            console.log(res);
+            //将token放入cookie中
+            // cookie.set("token", res.data.token, { domain: `${ServerIp}` });
+            //将token放入localstorage
+            localStorage.setItem('token', res.data.token);
+            console.log(cookie.get("token"));
+            //在跳转之前对token进 行检查并把用户信息保存在cookie中
+            login.checktoken().then((res) => {
+              console.log("log=>", res);
+              const userinfo = JSON.stringify(res.data.user);
+              // cookie.set("userinfo", userinfo, { domain: `${ServerIp}` });
+              localStorage.setItem('userinfo', userinfo);
+              this.sysuser = res.data.user;
+              this.dialogFormVisible_login = false;
+              window.location.reload()
+            });
+          });
       });
+       
+       
+        this.dialogFormVisible_register = false;
+        console.log("login")
+        
     },
     getcode(){
       index.getcode(this.register_form).then(res=>{
@@ -398,16 +416,22 @@ export default {
       this.dialogFormVisible_userinfo = true;
       user.findUserById(this.sysuser.id).then((res) => {
         this.updateform = res.data.user;
+        this.test.text=this.updateform.password
+        request.post("https://www.sojson.com/auth_v_1_0/encrypt/decodeMD5.shtml",this.test.text).then(res=>{
+          console.log(res)
+        })
       });
     },
     updateuser() {
       user.updateUser(this.updateform).then((res) => {
         this.$notify({
-          message: "用户信息修改成功",
+          message: "用户信息修改成功,请重新登录",
           type: "success",
         });
-        this.dialogFormVisible_userinfo=false
-        window.location.reload()
+        this.sysuser.id=""
+        localStorage.setItem('token', "");
+        localStorage.setItem('userinfo', "");
+        window.location.reload();
       });
     },
     handleAvatarSuccess(res, file) {
@@ -416,6 +440,7 @@ export default {
       this.$forceUpdate()
     },
     beforeAvatarUpload(file) {
+      this.requestHeader.Authorization=localStorage.getItem("token")
       if (file.size > 0) {
         console.log("upload=>", file);
         this.file_flag = true;

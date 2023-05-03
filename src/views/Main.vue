@@ -31,7 +31,7 @@
                     <img :src="item.avatarUrl" width="200px" height="200px" 
                     style="border-radius: 50%;" class="teacher_img" 
                     @click="to_teacherdetal(item.id)">
-                  <div>{{ item.username}}</div>
+                  <div>{{ item.nickname}}</div>
                   </div>
                   <div class="teacherdetail_right">
                     <div class="teacher_description">

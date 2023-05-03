@@ -96,6 +96,9 @@ export default {
         this.pageOrder()
     },
     pageOrder(){
+
+      const userinfo = JSON.parse(localStorage.getItem("userinfo"));
+      this.ordersearch.userId = userinfo.id;
         Order.pageOrder(this.page,this.limit,this.ordersearch).then(res=>{
             this.orderdata=res.data.data
             this.total=parseInt(res.data.total)  
