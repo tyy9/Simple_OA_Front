@@ -197,7 +197,7 @@
           >
           </el-input>
         </el-form-item>
-        <el-form-item label="别称" prop="ninckname">
+        <el-form-item label="别称" prop="nickname">
           <el-input
             class="inputtools"
             placeholder="请输入别称"
@@ -287,7 +287,7 @@ export default {
           },
           { min: 1, max: 20, message: "长度在 1 到 20个字符", trigger: "blur" },
         ],
-        ninckname: [
+        nickname: [
           {
             required: true,
             message: "请输入别名",
@@ -330,6 +330,7 @@ export default {
   },
   methods: {
     Login() {
+      this.sysuserdata.role="ROLE_STUDENT"
       this.$refs["ruleForm"].validate((vaild) => {
         if (vaild) {
           login.login(this.sysuserdata).then((res) => {
@@ -347,7 +348,7 @@ export default {
               localStorage.setItem('userinfo', userinfo);
               this.sysuser = res.data.user;
               this.dialogFormVisible_login = false;
-              window.location.reload()
+              
             });
           });
         } else {
@@ -374,6 +375,7 @@ export default {
         });
         this.sysuserdata.username = this.register_form.username;
         this.sysuserdata.password = this.register_form.password;
+        this.sysuserdata.role="ROLE_STUDENT"
         login.login(this.sysuserdata).then((res) => {
             console.log(res);
             //将token放入cookie中
@@ -389,7 +391,7 @@ export default {
               localStorage.setItem('userinfo', userinfo);
               this.sysuser = res.data.user;
               this.dialogFormVisible_login = false;
-              window.location.reload()
+             
             });
           });
       });
@@ -463,10 +465,11 @@ export default {
     login.checktoken().then((res) => {
       console.log("log=>", res);
       const userinfo = JSON.stringify(res.data.user);
-      cookie.set("userinfo", userinfo, { domain: `${ServerIp}` });
+      localStorage.setItem('userinfo', userinfo);
       this.sysuser = res.data.user;
     });
-  },
+  }
+  
 };
 </script>
 <style>

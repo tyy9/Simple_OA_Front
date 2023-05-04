@@ -32,5 +32,11 @@ export default{
             method:"post",
             data:order
         })
+    },
+    getOrderByUserId(id){
+        return request({
+            url:`/my_oa/course-order/getOrderByUserId/${id}`,
+            method:"post",
+        })
     }
 }

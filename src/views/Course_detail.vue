@@ -27,8 +27,8 @@
               <p>学分：{{ courseData.score }}</p>
               <p>{{ courseData.state ? "已开课" : "未开课" }}</p>
               <p>￥{{ courseData.price }}</p>
-              <el-button type="primary" slot="reference" @click="open_pay"
-                ><i class="el-icon-shopping-cart-2"></i>购买
+              <el-button :type="isbuy? 'success': 'primary'" slot="reference" @click="open_pay" :disabled="!isbuy?false:true"
+                ><i class="el-icon-shopping-cart-2"></i>{{isbuy? '已购买': '购买'}}
               </el-button>
               <i
                 class="el-icon-star-off"
@@ -71,7 +71,7 @@
                 height="50px"
                 style="border-radius: 50%"
               />
-              <p>{{ item.username }}</p>
+              <p>{{ item.nickname }}</p>
             </div>
             <p>:</p>
             <div class="content_box">
@@ -172,7 +172,6 @@
           <div class="order">
             <div class="order_right">
                 <img :src="courseData.avatar" width="500px" height="400px">
-                <img src="../assets/user.png">
             </div>
             <div class="order_left">
                 <p>{{ courseData.name }}</p>
@@ -224,7 +223,8 @@ export default {
       dialogFormVisible:false,
       dialogPayFormVisible:false,
       reply_id:"",
-      orderdata:{}
+      orderdata:{},
+      isbuy:""
     };
   },
   methods: {
@@ -276,6 +276,16 @@ export default {
         this.subject_children = res.data.subject;
       });
       this.getCourseComment();
+      //获取用户的订单信息
+      order.getOrderByUserId(this.userinfo.id).then(res=>{
+        const user_order=res.data.order
+        user_order.forEach(item=>{
+        if(item.courseId==this.courseData.id){
+            this.isbuy=true
+          }
+        })
+      })
+      
     },
     to_teacherdetal(id) {
       course.getCourseByUserId(id).then((res) => {

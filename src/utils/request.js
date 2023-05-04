@@ -55,7 +55,7 @@ instance.interceptors.response.use(
             // })
             Notification.warning({
                 title:"提示",
-                message:res.message
+                message:res.message+"，或token信息已过期，请重新登录"
             })
             return Promise.reject('error')
         }
