@@ -60,13 +60,13 @@
                 height="50px"
                 style="border-radius: 50%"
               />
-              <p>{{ item.username }}</p>
+              <p>{{ item.nickname }}</p>
             </div>
             <p>:</p>
             <div class="content_box">
               <div class="reply_box" v-show="item.replyuser_username?true:false">
                 <p style="line-height: 40px;color:red;font-size: 10px;font-weight: bold;">
-                  回复  {{item.replyuser_username}}:
+                  回复  {{item.replyuser_nickname}}:
                 </p> 
                 <p style="line-height: 40px;">
                   "
@@ -263,7 +263,7 @@ export default {
       // Comment.getCourseComment(this.courseData.id).then(res=>{
       //   this.commentList=res.data.comment
       // })
-      Comment.pageTeacher_Course(this.page,this.limit,this.commentdata).then(res=>{
+      Comment.pageComment_Teacher(this.page,this.limit,this.commentdata).then(res=>{
           this.total=this.total=parseInt(res.data.total); 
           this.commentList=res.data.comment
       })

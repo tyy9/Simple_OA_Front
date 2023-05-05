@@ -77,7 +77,7 @@
             <div class="content_box">
               <div class="reply_box" v-show="item.replyuser_username?true:false">
                 <p style="line-height: 40px;color:red;font-size: 10px;font-weight: bold;">
-                  回复  {{item.replyuser_username}}:
+                  回复  {{item.replyuser_nickname}}:
                 </p> 
                 <p style="line-height: 40px;">
                   "

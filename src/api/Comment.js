@@ -32,11 +32,24 @@ export default{
             data:comment
         })
     },
-    pageTeacher_Course(page,limit,comment){
+    pageComment_Teacher(page,limit,comment){
         return request({
-            url:`/my_oa/comment/pageTeacher_Course/${page}/${limit}`,
+            url:`/my_oa/comment/pageComment_Teacher/${page}/${limit}`,
             method:"post",
             data:comment
         })
-    }
+    },
+    pageUser_Comment(page,limit,search){
+        return request({
+            url:`/my_oa/comment/pageUser_Comment/${page}/${limit}`,
+            method:"post",
+            data:search
+        })
+    },
+    findCommentById(id){
+        return request({
+            url:`/my_oa/comment/findCommentById/${id}`,
+            method:"post",
+        })
+    } 
 }

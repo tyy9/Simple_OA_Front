@@ -35,7 +35,7 @@
                   </div>
                   <div class="teacherdetail_right">
                     <div class="teacher_description">
-                      <p v-html="item.description">
+                      <p v-html="item.description" class="v_html_img">
                         {{item.description}}
                       </p>
                     </div>
@@ -222,6 +222,7 @@ export default {
   margin: 5px;
   display: flex;
   flex-direction: row;
+  margin-top: 30px;
 }
 .box .container .recommendbox .teacherbox .teachercontent .teachershow .teacherdetail_left .teacher_img{
   box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
@@ -283,7 +284,7 @@ export default {
   margin: 5px;
   display: flex;
   flex-direction: row;
-
+  margin-top: 30px;
 }
 .box .container .recommendbox .Coursebox .Coursecontent .Courseshow .coursedetail_left img{
   box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04)
@@ -317,5 +318,8 @@ export default {
   font-size: 10px;
   color: #767676;
   text-align: left;
+}
+.v_html_img img{
+  display: none;
 }
 </style>
